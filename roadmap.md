@@ -21,9 +21,9 @@
 ### Week 3: Supabase Setup
 - [x] Set up Supabase project
 - [x] Implement Google OAuth authentication with Supabase
-- [ ] Configure database tables and relationships
-- [ ] Set up Row Level Security policies
-- [ ] Create initial API endpoints
+- [x] Configure database tables and relationships
+- [x] Set up Row Level Security policies
+- [x] Create initial API endpoints
 
 ### Week 4: Frontend Foundation
 - [ ] Implement layout and navigation components
