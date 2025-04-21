@@ -19,15 +19,15 @@
 ## Phase 2: Core Infrastructure (3 weeks)
 
 ### Week 3: Supabase Setup
-- [ ] Set up Supabase project
-- [ ] Implement authentication system
+- [x] Set up Supabase project
+- [x] Implement Google OAuth authentication with Supabase
 - [ ] Configure database tables and relationships
 - [ ] Set up Row Level Security policies
 - [ ] Create initial API endpoints
 
 ### Week 4: Frontend Foundation
 - [ ] Implement layout and navigation components
-- [ ] Create authentication screens (login/signup)
+- [x] Create Google OAuth authentication flow screens
 - [ ] Set up state management with Zustand
 - [ ] Build user profile management interface
 - [ ] Implement responsive design

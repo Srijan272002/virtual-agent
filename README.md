@@ -17,6 +17,39 @@ First, install the dependencies:
 npm install
 ```
 
+### Environment Setup
+
+1. Copy the environment template to create your local environment file:
+   ```bash
+   cp env.template .env.local
+   ```
+
+2. Update the following variables in your `.env.local`:
+   - `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+   - `GEMINI_API_KEY`: Your Google Gemini API key
+   - Other optional variables as needed
+
+### Setting up Supabase with Google OAuth
+
+1. Create a Supabase project at [https://supabase.com](https://supabase.com)
+2. Set up Google OAuth:
+   - Go to the [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or use an existing one
+   - Configure the OAuth consent screen
+   - Create OAuth credentials (Web application type)
+   - Add authorized JavaScript origins: `https://your-supabase-project.supabase.co`
+   - Add authorized redirect URIs: `https://your-supabase-project.supabase.co/auth/v1/callback`
+3. In your Supabase dashboard:
+   - Go to Authentication > Providers
+   - Enable Google provider
+   - Add your Client ID and Client Secret from Google Cloud Console
+4. Create a `.env.local` file with your Supabase credentials:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   ```
+
 Run the development server:
 
 ```bash
