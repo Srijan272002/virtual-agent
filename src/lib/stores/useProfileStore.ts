@@ -1,16 +1,11 @@
 import { create } from 'zustand'
-import { createClientSupabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 
 interface Profile {
   id: string
-  username: string | null
+  email: string
   full_name: string | null
   avatar_url: string | null
-  bio: string | null
-  location: string | null
-  website: string | null
-  twitter: string | null
-  instagram: string | null
   updated_at: string
 }
 
@@ -20,7 +15,7 @@ interface ProfileStore {
   error: string | null
   fetchProfile: () => Promise<void>
   updateProfile: (updates: Partial<Profile>) => Promise<void>
-  uploadAvatar: (file: File) => Promise<string>
+  uploadAvatar: (file: File) => Promise<void>
 }
 
 export const useProfileStore = create<ProfileStore>((set) => ({
@@ -30,88 +25,68 @@ export const useProfileStore = create<ProfileStore>((set) => ({
 
   fetchProfile: async () => {
     set({ isLoading: true, error: null })
-    const supabase = createClientSupabase()
-    
+
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        throw new Error('No session found')
-      }
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
+        .select()
+        .eq('id', user.id)
         .single()
 
       if (error) throw error
 
-      set({ profile: data, isLoading: false })
+      set({ profile: data })
     } catch (error) {
-      set({ error: (error as Error).message, isLoading: false })
+      set({ error: error instanceof Error ? error.message : 'Failed to fetch profile' })
+    } finally {
+      set({ isLoading: false })
     }
   },
 
   updateProfile: async (updates) => {
-    set({ isLoading: true, error: null })
-    const supabase = createClientSupabase()
-    
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        throw new Error('No session found')
-      }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', session.user.id)
-        .select()
-        .single()
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id)
 
-      if (error) throw error
+    if (error) throw error
 
-      set({ profile: data, isLoading: false })
-    } catch (error) {
-      set({ error: (error as Error).message, isLoading: false })
-    }
+    set((state) => ({
+      profile: state.profile ? { ...state.profile, ...updates } : null,
+    }))
   },
 
-  uploadAvatar: async (file: File) => {
-    const supabase = createClientSupabase()
-    
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        throw new Error('No session found')
-      }
+  uploadAvatar: async (file) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
 
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${session.user.id}-${Math.random()}.${fileExt}`
-      const filePath = `avatars/${fileName}`
+    const fileExt = file.name.split('.').pop()
+    const filePath = `${user.id}/avatar.${fileExt}`
 
-      const { error: uploadError } = await supabase.storage
-        .from('profiles')
-        .upload(filePath, file)
+    // Upload the file to storage
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file, { upsert: true })
 
-      if (uploadError) throw uploadError
+    if (uploadError) throw uploadError
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('profiles')
-        .getPublicUrl(filePath)
+    // Get the public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath)
 
-      await supabase
-        .from('profiles')
-        .update({ avatar_url: publicUrl })
-        .eq('id', session.user.id)
-
-      set((state) => ({
-        profile: state.profile ? { ...state.profile, avatar_url: publicUrl } : null
-      }))
-
-      return publicUrl
-    } catch (error) {
-      throw error
-    }
+    // Update the profile with the new avatar URL
+    await useProfileStore.getState().updateProfile({
+      avatar_url: publicUrl,
+    })
   },
 })) 

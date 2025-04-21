@@ -3,13 +3,13 @@
 import { useState, useRef, useEffect } from 'react'
 
 interface MessageInputProps {
-  onSendAction: (message: string) => Promise<void>
+  onSendMessageAction: (message: string) => Promise<void>
   disabled?: boolean
   placeholder?: string
 }
 
 export default function MessageInput({ 
-  onSendAction, 
+  onSendMessageAction, 
   disabled = false, 
   placeholder = 'Type a message...' 
 }: MessageInputProps) {
@@ -31,7 +31,7 @@ export default function MessageInput({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (message.trim() && !disabled) {
-      await onSendAction(message.trim())
+      await onSendMessageAction(message.trim())
       setMessage('')
     }
   }

@@ -1,7 +1,18 @@
+export type Role = 'user' | 'assistant' | 'system'
+
 export interface Message {
   id: string
+  role: Role
   content: string
-  created_at?: string
-  role: 'user' | 'assistant'
-  conversation_id: string
+  timestamp: Date
+  userId?: string
+}
+
+export interface Conversation {
+  id: string
+  title: string
+  createdAt: Date
+  updatedAt: Date
+  messages: Message[]
+  userId: string
 } 

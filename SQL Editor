@@ -1,0 +1,40 @@
+-- Create conversation participants table
+create table public.conversation_participants (
+    id uuid default gen_random_uuid() primary key,
+    conversation_id uuid not null references public.conversations(id) on delete cascade,
+    user_id uuid not null references auth.users(id) on delete cascade,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    unique(conversation_id, user_id)
+);
+
+-- Create enum for reaction types
+create type reaction_type as enum ('❤️', '👍', '😊', '😂', '🎉', '👋');
+
+-- Create reactions table
+create table public.message_reactions (
+    id uuid default gen_random_uuid() primary key,
+    message_id uuid not null references public.messages(id) on delete cascade,
+    user_id uuid not null references auth.users(id) on delete cascade,
+    reaction reaction_type not null,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    -- Each user can only react once with each emoji per message
+    unique(message_id, user_id, reaction)
+);
+
+-- Set up RLS policies
+alter table public.message_reactions enable row level security;
+
+-- Create policy "Users can view reactions for messages they can see"
+create policy "Users can view reactions for messages they can see"
+    on public.message_reactions
+    for select
+    using (
+        exists (
+            select 1 
+            from public.messages m
+            join public.conversation_participants cp 
+                on m.conversation_id = cp.conversation_id
+            where m.id = message_reactions.message_id
+            and cp.user_id = auth.uid()
+        )
+    ); 

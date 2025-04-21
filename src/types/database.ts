@@ -16,13 +16,27 @@ export type Conversation = {
   last_message_at: string
 }
 
-export type Message = {
+export type Role = 'user' | 'assistant' | 'system'
+
+export interface Message {
   id: string
   conversation_id: string
   content: string
-  role: 'user' | 'assistant'
+  role: Role
   created_at: string
-  embedding: number[] | null
+  parent_id?: string
+  embedding?: number[]
+  deleted?: boolean
+  thread_count?: number
+  user_id?: string
+}
+
+export interface MessageReaction {
+  id: string
+  message_id: string
+  user_id: string
+  type: string
+  created_at: string
 }
 
 export type PersonalityTrait = {
@@ -34,17 +48,29 @@ export type PersonalityTrait = {
   updated_at: string
 }
 
-export type Memory = {
+export type PersonalityAttribute = {
   id: string
-  user_id: string
-  content: string
-  importance: number
+  conversation_id: string
+  name: string
+  value: number
   created_at: string
-  last_accessed: string
-  embedding: number[] | null
+  updated_at: string
 }
 
-export type Database = {
+export type Memory = {
+  id: string
+  conversation_id: string
+  content: string
+  importance: number
+  context: string
+  embedding: number[] | null
+  created_at: string
+  last_accessed: string
+  sentiment: 'positive' | 'negative' | 'neutral'
+  associated_attributes: string[]
+}
+
+export interface Database {
   public: {
     Tables: {
       profiles: {
@@ -60,17 +86,27 @@ export type Database = {
       messages: {
         Row: Message
         Insert: Omit<Message, 'id' | 'created_at'>
-        Update: Partial<Omit<Message, 'id' | 'created_at'>>
+        Update: Partial<Message>
       }
       personality_traits: {
         Row: PersonalityTrait
         Insert: Omit<PersonalityTrait, 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Omit<PersonalityTrait, 'id' | 'created_at' | 'updated_at'>>
       }
+      personality_attributes: {
+        Row: PersonalityAttribute
+        Insert: Omit<PersonalityAttribute, 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Omit<PersonalityAttribute, 'id' | 'created_at' | 'updated_at'>>
+      }
       memories: {
         Row: Memory
         Insert: Omit<Memory, 'id' | 'created_at' | 'last_accessed'>
         Update: Partial<Omit<Memory, 'id' | 'created_at'>>
+      }
+      message_reactions: {
+        Row: MessageReaction
+        Insert: Omit<MessageReaction, 'id' | 'created_at'>
+        Update: Partial<MessageReaction>
       }
     }
     Views: {
