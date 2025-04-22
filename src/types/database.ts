@@ -17,12 +17,15 @@ export type Conversation = {
 }
 
 export type Role = 'user' | 'assistant' | 'system'
+export type MessageType = 'text' | 'voice'
 
 export interface Message {
   id: string
   conversation_id: string
   content: string
   role: Role
+  type?: MessageType
+  voice_url?: string
   created_at: string
   parent_id?: string
   embedding?: number[]
@@ -70,6 +73,21 @@ export type Memory = {
   associated_attributes: string[]
 }
 
+export type SharedImage = {
+  id: string
+  url: string
+  caption?: string
+  file_path?: string
+  created_at: string
+}
+
+export type SharedVoice = {
+  id: string
+  url: string
+  duration: number
+  created_at: string
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -107,6 +125,16 @@ export interface Database {
         Row: MessageReaction
         Insert: Omit<MessageReaction, 'id' | 'created_at'>
         Update: Partial<MessageReaction>
+      }
+      shared_images: {
+        Row: SharedImage
+        Insert: Omit<SharedImage, 'id' | 'created_at'>
+        Update: Partial<SharedImage>
+      }
+      shared_voices: {
+        Row: SharedVoice
+        Insert: Omit<SharedVoice, 'id' | 'created_at'>
+        Update: Partial<SharedVoice>
       }
     }
     Views: {

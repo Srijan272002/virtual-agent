@@ -9,6 +9,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, Camera } from 'lucide-react'
 import { toast } from 'sonner'
+import PersonalityForm from '@/components/PersonalityForm'
+import PreferencesForm from '@/components/PreferencesForm'
+import AppearanceForm from '@/components/AppearanceForm'
+import RelationshipProgress from '@/components/RelationshipProgress'
+import FeatureSuggestionForm from '@/components/FeatureSuggestionForm'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function ProfilePage() {
   const { profile, isLoading, error, fetchProfile, updateProfile, uploadAvatar } = useProfileStore()
@@ -76,7 +82,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container max-w-2xl py-8 space-y-8">
+    <div className="container max-w-4xl py-8 space-y-8">
       <Card>
         <CardHeader>
           <CardTitle>Profile Settings</CardTitle>
@@ -141,6 +147,29 @@ export default function ProfilePage() {
           </form>
         </CardContent>
       </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <RelationshipProgress />
+        
+        <Tabs defaultValue="personality" className="w-full">
+          <TabsList className="grid grid-cols-3 w-full">
+            <TabsTrigger value="personality">Personality</TabsTrigger>
+            <TabsTrigger value="appearance">Appearance</TabsTrigger>
+            <TabsTrigger value="preferences">Preferences</TabsTrigger>
+          </TabsList>
+          <TabsContent value="personality" className="pt-4">
+            <PersonalityForm />
+          </TabsContent>
+          <TabsContent value="appearance" className="pt-4">
+            <AppearanceForm />
+          </TabsContent>
+          <TabsContent value="preferences" className="pt-4">
+            <PreferencesForm />
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <FeatureSuggestionForm />
     </div>
   )
 } 

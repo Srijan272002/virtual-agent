@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import type { Message } from '@/types/database'
 import { MoreVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { VoiceMessage } from './VoiceMessage'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +29,7 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ message, isUser, userId, avatar, reactions, onDelete }: MessageBubbleProps) {
   const canDelete = userId && message.user_id === userId
+  const isVoiceMessage = message.type === 'voice' && message.voice_url
 
   return (
     <div className={cn("flex w-full gap-2", isUser ? "flex-row-reverse" : "flex-row")}>
@@ -40,7 +42,18 @@ export function MessageBubble({ message, isUser, userId, avatar, reactions, onDe
           "max-w-[80%] p-3",
           isUser ? "bg-primary text-primary-foreground" : "bg-muted"
         )}>
-          <p className="text-sm">{message.content}</p>
+          {isVoiceMessage ? (
+            <VoiceMessage
+              mode="playback"
+              audioUrl={message.voice_url}
+              className={cn(
+                "min-w-[200px]",
+                isUser ? "text-primary-foreground" : "text-foreground"
+              )}
+            />
+          ) : (
+            <p className="text-sm">{message.content}</p>
+          )}
           {reactions && reactions.length > 0 && (
             <div className="mt-2 flex gap-1">
               {reactions.map((reaction) => (
